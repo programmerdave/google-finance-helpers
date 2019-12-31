@@ -4,28 +4,63 @@ var expect = require('expect.js');
 
 var sinon = require('sinon');
 
-var glib;
 var defMock = gas.globalMockDefault;
 
 describe('IsLeftToPayInCycle', function() {
+  var glib;
   this.beforeAll(function() {
-    //Mock MailApp by extending default mock object
-    /*var customMock = { 
-      MailApp: { getRemainingDailyQuota: function () { return 50; } },
-      __proto__: defMock 
-    };*/
-
     glib = gas.require('./src');
   });
-
+//currentDate, cycleEndDay, billDueDay
   describe('#IsLeftToPayInCycle()', function() {
-    it('should work', function() {
-      expect(glib.IsLeftToPayInCycle(1, 7, 12, new Date("1/1/2020"))).to.be(false);
+    describe('when today is after the cycle end day', function() {
+      var currentDate = new Date("1/13/2019");
+      var cycleEndDay = 6;
+      it('should return false if the bill due day has passed', function() {
+        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 11)).to.be(false);
+      });
+
+      it('should return true if the bill due day has not passed', function() {
+        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 18)).to.be(true);
+      });
+
+      it('should return true if the bill due day has passed and is before the cycle end day', function() {
+        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 2)).to.be(true);
+      });
+
+      it('should return true if the bill due day has passed and is the same as the cycle end day', function() {
+        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 6)).to.be(true);
+      });
+
+      it('should return false if the bill due day has passed and is after the cycle end day', function() {
+        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 7)).to.be(false);
+      });
+    });
+
+    describe('when today is after the start of the month but before the cycle end day', function() {
+      var currentDate = new Date("1/3/2019");
+      var cycleEndDay = 6;
+      it('should return false if the bill due day has passed', function() {
+        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 2)).to.be(false);
+      });
+
+      it('should return true if the bill due day has not passed', function() {
+        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 4)).to.be(true);
+      });
+
+      it('should return true if the bill due day has not passed and is the same as the cycle end day', function() {
+        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 6)).to.be(true);
+      });
+
+      it('should return false if the bill due day has not passed and is after the cycle end day', function() {
+        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 7)).to.be(false);
+      });
     });
   });
 });
 
 describe('ReadCryptoPrices', function() {
+  var glib;
   describe('#TestCrypto()', function() {
     this.beforeEach(function() {
       var propertiesMock = {
