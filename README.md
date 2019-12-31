@@ -3,3 +3,6 @@
 
 ## Clasp Docs
 https://developers.google.com/apps-script/guides/clasp
+
+## Testing Locally
+Using gas-local to test: https://github.com/mzagorny/gas-local
