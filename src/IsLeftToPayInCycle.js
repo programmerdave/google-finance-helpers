@@ -20,4 +20,6 @@ function IsLeftToPayInCycle(billDueDay, globalBillDueDay, currentMonth, billPayM
   }
 }
 
-Logger.log(IsLeftToPayInCycle(1, 7, 12, new Date("12/1/2019")));
+function TestIsLeftToPayInCycle() {
+  Logger.log(IsLeftToPayInCycle(1, 7, 12, new Date("12/1/2019")));
+}
