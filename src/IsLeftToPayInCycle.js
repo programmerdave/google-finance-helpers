@@ -19,7 +19,3 @@ function IsLeftToPayInCycle(billDueDay, globalBillDueDay, currentMonth, billPayM
     return isMatchingNextMonth;
   }
 }
-
-function TestIsLeftToPayInCycle() {
-  Logger.log(IsLeftToPayInCycle(1, 7, 12, new Date("12/1/2019")));
-}

@@ -17,14 +17,8 @@ function ReadCryptoPrices(coinName) {
     }
   };
   
-  Logger.log(JSON.stringify(params));
-  
   response = UrlFetchApp.fetch('https://rest.coinapi.io/v1/exchangerate/' + coinName + '/USD', params);
   rateData = JSON.parse(response.getContentText())
   
   return rateData.rate;
-}
-
-function TestCrypto() {
-  Logger.log(ReadCryptoPrices("BCH"));
 }
