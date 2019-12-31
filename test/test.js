@@ -11,50 +11,263 @@ describe('IsLeftToPayInCycle', function() {
   this.beforeAll(function() {
     glib = gas.require('./src');
   });
-//currentDate, cycleEndDay, billDueDay
+
   describe('#IsLeftToPayInCycle()', function() {
-    describe('when today is after the cycle end day', function() {
-      var currentDate = new Date("1/13/2019");
-      var cycleEndDay = 6;
-      it('should return false if the bill due day has passed', function() {
-        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 11)).to.be(false);
+    var shouldBehaveRegularly = function() {
+      describe('when today is after the cycle end day', function() {
+        var currentDate = new Date("1/13/2019");
+        var cycleEndDay = 6;
+        it('should return false if the bill due day has passed', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 11, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return true if the bill due day has not passed', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 18, this.oneTimePaymentDate)).to.be(true);
+        });
+
+        it('should return false if the bill due day is set to this month after the cycle end day and the bill due day has passed', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 7, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return true if the bill due day is set to next month before the cycle end day and the bill due day has not passed yet', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 2, this.oneTimePaymentDate)).to.be(true);
+        });
+
+        it('should return true if the bill due day is set to next month on the same day as the cycle end day and the bill due day has not passed yet', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 6, this.oneTimePaymentDate)).to.be(true);
+        });
       });
 
-      it('should return true if the bill due day has not passed', function() {
-        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 18)).to.be(true);
+      describe('when today is after the start of the month but before the cycle end day', function() {
+        var currentDate = new Date("1/3/2019");
+        var cycleEndDay = 6;
+        it('should return false if the bill due day is set to the next month and the bill due day has passed', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 2, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return true if the bill due day is set to the next month and the bill due day has not passed', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 4, this.oneTimePaymentDate)).to.be(true);
+        });
+
+        it('should return true if the bill due day is set to the next month and the bill due day is today', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 3, this.oneTimePaymentDate)).to.be(true);
+        });
+
+        it('should return true if the bill due day is set to the next month on the same day as the cycle end day and the bill due day has not passed yet', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 6, this.oneTimePaymentDate)).to.be(true);
+        });
+
+        it('should return false if the bill due day is set to the current month and is after the cycle end day', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 7, this.oneTimePaymentDate)).to.be(false);
+        });
+      });
+    };
+
+    describe('Should behave regularly if one time payment date is undefined', function() {
+      this.beforeEach(function() {
+        this.oneTimePaymentDate = undefined;
       });
 
-      it('should return true if the bill due day has passed and is before the cycle end day', function() {
-        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 2)).to.be(true);
-      });
-
-      it('should return true if the bill due day has passed and is the same as the cycle end day', function() {
-        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 6)).to.be(true);
-      });
-
-      it('should return false if the bill due day has passed and is after the cycle end day', function() {
-        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 7)).to.be(false);
-      });
+      shouldBehaveRegularly();
     });
 
-    describe('when today is after the start of the month but before the cycle end day', function() {
-      var currentDate = new Date("1/3/2019");
-      var cycleEndDay = 6;
-      it('should return false if the bill due day has passed', function() {
-        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 2)).to.be(false);
+    describe('Should behave regularly if one time payment date is null', function() {
+      this.beforeEach(function() {
+        this.oneTimePaymentDate = null;
       });
 
-      it('should return true if the bill due day has not passed', function() {
-        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 4)).to.be(true);
+      shouldBehaveRegularly();
+    });
+
+    describe('Should behave regularly if one time payment date is a blank string', function() {
+      this.beforeEach(function() {
+        this.oneTimePaymentDate = "";
       });
 
-      it('should return true if the bill due day has not passed and is the same as the cycle end day', function() {
-        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 6)).to.be(true);
+      shouldBehaveRegularly();
+    });
+
+    describe('when there is a one time payment date that is not in this month or next month', function() {
+      this.beforeEach(function() {
+        this.oneTimePaymentDate = new Date("3/1/2019");
       });
 
-      it('should return false if the bill due day has not passed and is after the cycle end day', function() {
-        expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 7)).to.be(false);
+      describe('when today is after the cycle end day', function() {
+        var currentDate = new Date("1/13/2019");
+        var cycleEndDay = 6;
+        it('should return false if the bill due day has passed', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 11, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return false if the bill due day has not passed since the one time payment date is not this month or next month', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 18, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return false if the bill due day is set to this month after the cycle end day and the bill due day has passed since the one time payment date is not this month or next month', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 7, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return false if the bill due day is set to next month before the cycle end day and the bill due day has not passed yet since the one time payment date is not this month or next month', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 2, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return false if the bill due day is set to next month on the same day as the cycle end day and the bill due day has not passed yet since the one time payment date is not this month or next month', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 6, this.oneTimePaymentDate)).to.be(false);
+        });
       });
+
+      describe('when today is after the start of the month but before the cycle end day', function() {
+        var currentDate = new Date("1/3/2019");
+        var cycleEndDay = 6;
+        it('should return false if the bill due day is set to the next month and the bill due day has passed', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 2, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return false if the bill due day is set to the next month and the bill due day has not passed since the one time payment date is not this month or next month', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 4, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return false if the bill due day is set to the next month and the bill due day is today since the one time payment date is not this month or next month', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 3, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return false if the bill due day is set to the next month on the same day as the cycle end day and the bill due day has not passed yet since the one time payment date is not this month or next month', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 6, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return false if the bill due day is set to the current month and is after the cycle end day', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 7, this.oneTimePaymentDate)).to.be(false);
+        });
+      }); 
+    });
+
+    describe('when there is a one time payment date that is in this month', function() {
+      this.beforeEach(function() {
+        this.oneTimePaymentDate = new Date("1/1/2019");
+      });
+
+      describe('when today is after the cycle end day', function() {
+        var currentDate = new Date("1/13/2019");
+        var cycleEndDay = 6;
+        it('should return false if the bill due day has passed', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 11, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return true if the bill due day has not passed', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 18, this.oneTimePaymentDate)).to.be(true);
+        });
+
+        it('should return false if the bill due day is set to this month after the cycle end day and the bill due day has passed', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 7, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        //since it's next month and we expect the one time payment date to be this month, then it's not due
+        it('should return false if the bill due day is set to next month before the cycle end day and the bill due day has not passed yet', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 2, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        //since it's next month and we expect the one time payment date to be this month, then it's not due
+        it('should return false if the bill due day is set to next month on the same day as the cycle end day and the bill due day has not passed yet', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 6, this.oneTimePaymentDate)).to.be(false);
+        });
+      });
+
+      describe('when today is after the start of the month but before the cycle end day', function() {
+        var currentDate = new Date("1/3/2019");
+        var cycleEndDay = 6;
+        it('should return false if the bill due day is set to the next month and the bill due day has passed', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 2, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        //since it's next month and we expect the one time payment date to be this month, then it's not due
+        it('should return false if the bill due day is set to the next month and the bill due day has not passed', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 4, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        //since it's next month and we expect the one time payment date to be this month, then it's not due
+        it('should return false if the bill due day is set to the next month and the bill due day is today', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 3, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return false if the bill due day is set to the next month on the same day as the cycle end day and the bill due day has not passed yet', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 6, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return false if the bill due day is set to the current month and is after the cycle end day', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 7, this.oneTimePaymentDate)).to.be(false);
+        });
+      }); 
+    });
+
+    describe('when there is a one time payment date that is next month', function() {
+      this.beforeEach(function() {
+        this.oneTimePaymentDate = new Date("2/1/2019");
+      });
+
+      describe('when today is after the cycle end day', function() {
+        var currentDate = new Date("1/13/2019");
+        var cycleEndDay = 6;
+        it('should return false if the bill due day has passed', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 11, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return false if the bill due day has not passed since this month there is no one time payment', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 18, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return false if the bill due day is set to this month after the cycle end day and the bill due day has passed', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 7, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return true if the bill due day is set to next month before the cycle end day and the bill due day has not passed yet', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 2, this.oneTimePaymentDate)).to.be(true);
+        });
+
+        it('should return true if the bill due day is set to next month on the same day as the cycle end day and the bill due day has not passed yet', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 6, this.oneTimePaymentDate)).to.be(true);
+        });
+      });
+
+      describe('when today is after the start of the month but before the cycle end day', function() {
+        var currentDate = new Date("1/3/2019");
+        var cycleEndDay = 6;
+        it('should return false if the bill due day is set to the next month and the bill due day has passed', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 2, this.oneTimePaymentDate)).to.be(false);
+        });
+
+        it('should return true if the bill due day is set to the next month and the bill due day has not passed', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 4, this.oneTimePaymentDate)).to.be(true);
+        });
+
+        it('should return true if the bill due day is set to the next month and the bill due day is today', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 3, this.oneTimePaymentDate)).to.be(true);
+        });
+
+        it('should return true if the bill due day is set to the next month on the same day as the cycle end day and the bill due day has not passed yet', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 6, this.oneTimePaymentDate)).to.be(true);
+        });
+
+        it('should return false if the bill due day is set to the current month and is after the cycle end day', function() {
+          expect(glib.IsLeftToPayInCycle(currentDate, cycleEndDay, 7, this.oneTimePaymentDate)).to.be(false);
+        });
+      });
+    });
+  });
+
+  describe('#AddDays', function() {
+    it("should go to next month if a month of days are added", function() {
+      var newDate = glib.AddDays(new Date("1/1/2019"), 31);
+      expect(newDate.getMonth()).to.equal(1); // getMonth is zero based
+    });
+
+    it("should stay in the same year if it's not december", function() {
+      var newDate = glib.AddDays(new Date("1/1/2019"), 31);
+      expect(newDate.getFullYear()).to.equal(2019);
+    });
+
+    it("should go to the next year if it's december", function() {
+      var newDate = glib.AddDays(new Date("12/1/2019"), 31);
+      expect(newDate.getFullYear()).to.equal(2020);
     });
   });
 });
