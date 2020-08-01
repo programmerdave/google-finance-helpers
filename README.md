@@ -22,8 +22,7 @@ This can be referenced from another Google Apps Scripts project. You can referen
 https://developers.google.com/apps-script/concepts/deployments  
 ```
 clasp push
-clasp version [description]
-clasp deploy [version] [description]
+clasp deploy -V [version] -d [description]
 clasp deployments
 ```
 
