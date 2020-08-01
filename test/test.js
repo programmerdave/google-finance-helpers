@@ -299,14 +299,35 @@ describe('ReadCryptoPrices', function() {
     });
 
     it('should get the coin price', function() {
-      expect(glib.ReadCryptoPrices("BTC")).to.equal(1015);
+      //Month is zero based!!!
+      expect(glib.ReadCryptoPrices("BTC", new Date(Date.UTC(2020, 0, 30)))).to.equal(1015);
     });
 
     it('should have received the correct API url', function() {
-      glib.ReadCryptoPrices("BTC");
-      expect(glib.UrlFetchApp.fetch.getCall(0).args[0]).to.equal("https://api.coinbase.com/v2/prices/BTC-USD/spot");
+      //Month is zero based!!!
+      glib.ReadCryptoPrices("BTC", new Date(Date.UTC(2020, 0, 30)));
+      expect(glib.UrlFetchApp.fetch.getCall(0).args[0]).to.equal("https://api.coinbase.com/v2/prices/BTC-USD/spot?date=2020-1-30");
     });
 
+    it('should require a date', function() {
+      expect(() => glib.ReadCryptoPrices("BTC")).to.throwException(/Invalid Date/);
+    });
+
+    it('should require a date not to be null', function() {
+      expect(() => glib.ReadCryptoPrices("BTC", null)).to.throwException(/Invalid Date/);
+    });
+
+    it('should require a date not to be undefined', function() {
+      expect(() => glib.ReadCryptoPrices("BTC", undefined)).to.throwException(/Invalid Date/);
+    });
+
+    it('should require a date to be a date object', function() {
+      expect(() => glib.ReadCryptoPrices("BTC", "")).to.throwException(/Invalid Date/);
+      expect(() => glib.ReadCryptoPrices("BTC", {})).to.throwException(/Invalid Date/);
+      expect(() => glib.ReadCryptoPrices("BTC", [])).to.throwException(/Invalid Date/);
+      expect(() => glib.ReadCryptoPrices("BTC", Date.UTC(2020, 1, 30))).to.throwException(/Invalid Date/); //must use new Date()
+      expect(() => glib.ReadCryptoPrices("BTC", Date(2020, 1, 30))).to.throwException(/Invalid Date/); //must use new Date()
+    });
     /*it('should have received the correct params', function() {
       glib.ReadCryptoPrices("BCH");
       expect(glib.UrlFetchApp.fetch.getCall(0).args[1].headers["X-CoinAPI-Key"]).to.equal("12345");
