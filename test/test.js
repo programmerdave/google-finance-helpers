@@ -281,7 +281,12 @@ describe('ReadCryptoPrices', function() {
       };
 
       var responseMock = {
-        getContentText: sinon.fake.returns('{"rate": 124}')
+        getContentText: sinon.fake.returns('{ \
+          "data": { \
+            "amount": "1015.00", \
+            "currency": "USD" \
+          } \
+        }')
       };
 
       var customMock = { 
@@ -294,17 +299,17 @@ describe('ReadCryptoPrices', function() {
     });
 
     it('should get the coin price', function() {
-      expect(glib.ReadCryptoPrices("BCH")).to.equal(124);
+      expect(glib.ReadCryptoPrices("BTC")).to.equal(1015);
     });
 
     it('should have received the correct API url', function() {
-      glib.ReadCryptoPrices("BCH");
-      expect(glib.UrlFetchApp.fetch.getCall(0).args[0]).to.equal("https://rest.coinapi.io/v1/exchangerate/BCH/USD");
+      glib.ReadCryptoPrices("BTC");
+      expect(glib.UrlFetchApp.fetch.getCall(0).args[0]).to.equal("https://api.coinbase.com/v2/prices/BTC-USD/spot");
     });
 
-    it('should have received the correct params', function() {
+    /*it('should have received the correct params', function() {
       glib.ReadCryptoPrices("BCH");
       expect(glib.UrlFetchApp.fetch.getCall(0).args[1].headers["X-CoinAPI-Key"]).to.equal("12345");
-    });
+    });*/
   });
 });

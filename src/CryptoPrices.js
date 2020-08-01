@@ -1,6 +1,7 @@
 
 /**
  * Reads Current Crypto Prices
+ * Uses the coinbase API spot price
  *
  * @param {string} coinName The name of the coin you want to fetch.
  * @return Crypto Prices
@@ -8,17 +9,15 @@
  */
 function ReadCryptoPrices(coinName) {
   
-  var coinApiKey = PropertiesService.getScriptProperties().getProperty("CoinAPIKey");
-  
+  //var coinApiKey = PropertiesService.getScriptProperties().getProperty("CoinAPIKey");
+  //Change service to Coinbase. Doesn't need authentication
+
   var params = {
-    contentType: "application/json",
-    headers: {
-      "X-CoinAPI-Key": coinApiKey
-    }
+    contentType: "application/json"
   };
   
-  response = UrlFetchApp.fetch('https://rest.coinapi.io/v1/exchangerate/' + coinName + '/USD', params);
+  response = UrlFetchApp.fetch('https://api.coinbase.com/v2/prices/' + coinName + '-USD/spot', params);
   rateData = JSON.parse(response.getContentText())
   
-  return rateData.rate;
+  return +rateData.data.amount;
 }
