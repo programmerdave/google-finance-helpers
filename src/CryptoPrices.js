@@ -4,7 +4,7 @@
  * Uses the coinbase API spot price
  *
  * @param {string} coinName The name of the coin you want to fetch.
- * @param {Date} date The date in UTC to fetch the price
+ * @param {Date} date The date local or UTC to fetch the price. The price is fetched according to UTC time
  * @return Crypto Prices
  * @customfunction
  */
