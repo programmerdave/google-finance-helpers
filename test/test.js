@@ -280,13 +280,51 @@ describe('ReadCryptoPrices', function() {
         getProperty: sinon.fake.returns("12345")
       };
 
+      const krakenResponse = {
+        "error": [],
+        "result": {
+          "XXRPZUSD": {
+            "a": [
+              "0.39056000",
+              "1324",
+              "1324.000"
+            ],
+            "b": [
+              "0.38984000",
+              "309",
+              "309.000"
+            ],
+            "c": [
+              "0.38938000",
+              "686.29649000"
+            ],
+            "v": [
+              "378903898.86168121",
+              "417456200.83661561"
+            ],
+            "p": [
+              "0.55574461",
+              "0.54793044"
+            ],
+            "t": [
+              96173,
+              105527
+            ],
+            "l": [
+              "0.37130000",
+              "0.37130000"
+            ],
+            "h": [
+              "0.75991000",
+              "0.75991000"
+            ],
+            "o": "0.49576000"
+          }
+        }
+      };
+
       var responseMock = {
-        getContentText: sinon.fake.returns('{ \
-          "data": { \
-            "amount": "1015.00", \
-            "currency": "USD" \
-          } \
-        }')
+        getContentText: sinon.fake.returns(JSON.stringify(krakenResponse))
       };
 
       var customMock = { 
@@ -299,38 +337,17 @@ describe('ReadCryptoPrices', function() {
     });
 
     it('should get the coin price', function() {
-      //Month is zero based!!!
-      expect(glib.ReadCryptoPrices("BTC", new Date(Date.UTC(2020, 0, 30)))).to.equal(1015);
+      expect(glib.ReadCryptoPrices("BTC")).to.equal(0.39056000);
     });
 
     it('should have received the correct API url', function() {
-      //Month is zero based!!!
-      glib.ReadCryptoPrices("BTC", new Date(Date.UTC(2020, 0, 30)));
-      expect(glib.UrlFetchApp.fetch.getCall(0).args[0]).to.equal("https://api.coinbase.com/v2/prices/BTC-USD/spot?date=2020-1-30");
+      glib.ReadCryptoPrices("BTC");
+      expect(glib.UrlFetchApp.fetch.getCall(0).args[0]).to.equal("https://api.kraken.com/0/public/Ticker?pair=BTCUSD");
     });
 
-    it('should require a date', function() {
-      expect(() => glib.ReadCryptoPrices("BTC")).to.throwException(/Invalid Date/);
+    it('should have received the correct API url with a capitalized coin name', function() {
+      glib.ReadCryptoPrices("btC");
+      expect(glib.UrlFetchApp.fetch.getCall(0).args[0]).to.equal("https://api.kraken.com/0/public/Ticker?pair=BTCUSD");
     });
-
-    it('should require a date not to be null', function() {
-      expect(() => glib.ReadCryptoPrices("BTC", null)).to.throwException(/Invalid Date/);
-    });
-
-    it('should require a date not to be undefined', function() {
-      expect(() => glib.ReadCryptoPrices("BTC", undefined)).to.throwException(/Invalid Date/);
-    });
-
-    it('should require a date to be a date object', function() {
-      expect(() => glib.ReadCryptoPrices("BTC", "")).to.throwException(/Invalid Date/);
-      expect(() => glib.ReadCryptoPrices("BTC", {})).to.throwException(/Invalid Date/);
-      expect(() => glib.ReadCryptoPrices("BTC", [])).to.throwException(/Invalid Date/);
-      expect(() => glib.ReadCryptoPrices("BTC", Date.UTC(2020, 1, 30))).to.throwException(/Invalid Date/); //must use new Date()
-      expect(() => glib.ReadCryptoPrices("BTC", Date(2020, 1, 30))).to.throwException(/Invalid Date/); //must use new Date()
-    });
-    /*it('should have received the correct params', function() {
-      glib.ReadCryptoPrices("BCH");
-      expect(glib.UrlFetchApp.fetch.getCall(0).args[1].headers["X-CoinAPI-Key"]).to.equal("12345");
-    });*/
   });
 });

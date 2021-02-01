@@ -1,4 +1,3 @@
-
 /**
  * Reads Current Crypto Prices
  * Uses the coinbase API spot price
@@ -8,22 +7,16 @@
  * @return Crypto Prices
  * @customfunction
  */
-function ReadCryptoPrices(coinName, date) {
-  
-  if (!date || Object.prototype.toString.call(date) !== '[object Date]') {
-    throw new Error("Invalid Date");
-  }
-
-  //var coinApiKey = PropertiesService.getScriptProperties().getProperty("CoinAPIKey");
-  //Change service to Coinbase. Doesn't need authentication
-
+function ReadCryptoPrices(coinName) {
   var params = {
     contentType: "application/json"
   };
-  
-  //getMonth and getUTCMonth are zero based!!
-  response = UrlFetchApp.fetch('https://api.coinbase.com/v2/prices/' + coinName + `-USD/spot?date=${date.getUTCFullYear()}-${date.getUTCMonth()+1}-${date.getUTCDate()}`, params);
+
+  //since Kraken doesn't offer the spot price through it's API, use the ask price
+  //https://www.kraken.com/en-us/features/api#get-ticker-info
+  response = UrlFetchApp.fetch('https://api.kraken.com/0/public/Ticker?pair=' + coinName.toUpperCase() + `USD`, params);
   rateData = JSON.parse(response.getContentText());
   
-  return +rateData.data.amount;
+  const result = rateData.result;
+  return +result[Object.keys(result)[0]].a[0];
 }
