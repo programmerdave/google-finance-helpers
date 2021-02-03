@@ -11,6 +11,11 @@ Using gas-local to test: https://github.com/mzagorny/gas-local
 ## Run Tests
 Run `npm test`
 
+## Login to Clasp first
+```
+clasp login
+```
+
 ## Deploy latest changes to the google sheets document  
 It reads off the "HEAD" deployment - which is Development Mode  
 ```
