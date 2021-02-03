@@ -11,7 +11,19 @@ Using gas-local to test: https://github.com/mzagorny/gas-local
 ## Run Tests
 Run `npm test`
 
-## Login to Clasp first
+## Create a Clasp Project Settings File
+Create a `.clasp.json` file. This file is not committed to source control.
+
+```
+{
+  "scriptId": "YOUR_SCRIPT_ID_HERE",
+  "rootDir": "src/"
+}
+```
+
+More info here [Clasp Project Settings](https://github.com/google/clasp#project-settings-file-claspjson)
+
+## Login to Clasp
 ```
 clasp login
 ```
